@@ -21,7 +21,7 @@ export default function Map({ issues, onMapClick }: Props) {
     mapRef.current = new mapboxgl.Map({
       container: mapContainer.current,
       style: 'mapbox://styles/mapbox/streets-v11',
-      center: [-121.9942, 37.5655], // 📍 36300 Fremont Blvd
+      center: [-121.9942, 50.5655], // 📍 36300 Fremont Blvd
       zoom: 17,
     });
 
@@ -53,5 +53,8 @@ export default function Map({ issues, onMapClick }: Props) {
     };
   }, [issues]);
 
-  return <div ref={mapContainer} className="fixed inset-0 z-0" />;
+  return (
+    // <div ref={mapContainer} className="w-[800px] h-[600px] mx-auto my-8 rounded-lg shadow-lg" />
+    <div>Map Component</div>
+  );
 }

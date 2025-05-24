@@ -39,13 +39,17 @@ export default function Home() {
   }, []);
 
   return (
-    <main className="relative h-screen w-screen">
-      <Map issues={issues} onMapClick={handleMapClick} />
-      {selectedLocation && (
-        <div className="absolute bottom-0 left-0 w-full bg-white bg-opacity-90 p-4 z-50 max-w-md mx-auto">
-          <ReportForm location={selectedLocation} onSubmit={handleNewIssue} />
-        </div>
-      )}
+    <main className="min-h-screen w-full bg-white p-4">
+      <div className="max-w-[1200px] mx-auto">
+        {/* <Map issues={issues} onMapClick={handleMapClick} /> */}
+        {selectedLocation && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+            <div className="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md mx-4 border-2 border-gray-700">
+              <ReportForm location={selectedLocation} onSubmit={handleNewIssue} />
+            </div>
+          </div>
+        )}
+      </div>
     </main>
   );
 }
