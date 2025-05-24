@@ -1,8 +1,9 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
 
 export default function HomePage() {
+  const router = useRouter();
   return (
     <div className="w-full overflow-x-hidden">
       {/* Section 1: Hero */}
@@ -32,9 +33,12 @@ export default function HomePage() {
           transition={{ duration: 1.2, delay: 0.4 }}
           className="mt-8"
         >
-          <Button className="rounded-2xl px-6 py-3 text-lg shadow-lg">
+          <button
+            className="rounded-2xl px-6 py-3 text-lg shadow-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition"
+            onClick={() => router.push("/map")}
+          >
             View the Map
-          </Button>
+          </button>
         </motion.div>
       </section>
 

@@ -1,55 +1,48 @@
-'use client';
+"use client";
+import React from "react";
+import { motion } from "framer-motion";
+import { useRouter } from "next/navigation";
 
-import dynamic from 'next/dynamic';
-import { useEffect, useState } from 'react';
-import ReportForm from '@/componenets/ReportForm/ReportForm';
-import { Issue } from '@/componenets/types';
-
-const Map = dynamic(() => import('@/componenets/Map'), { ssr: false });
-
-export default function Home() {
-  const [issues, setIssues] = useState<Issue[]>(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('issues');
-      return stored ? JSON.parse(stored) : [];
-    }
-    return [];
-  });
-
-  const [selectedLocation, setSelectedLocation] = useState<{ lng: number; lat: number } | null>(null);
-
-  const handleMapClick = (location: { lng: number; lat: number }) => {
-    setSelectedLocation(location);
-  };
-
-  const handleNewIssue = (issue: Issue) => {
-    const updatedIssues = [...issues, issue];
-    setIssues(updatedIssues);
-    localStorage.setItem('issues', JSON.stringify(updatedIssues));
-    setSelectedLocation(null);
-  };
-
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const stored = localStorage.getItem('issues');
-      if (stored) {
-        setIssues(JSON.parse(stored));
-      }
-    }
-  }, []);
-
+export default function HomePage() {
+  const router = useRouter();
   return (
-    <main className="min-h-screen w-full bg-white p-4">
-      <div className="max-w-[1200px] mx-auto">
-        {/* <Map issues={issues} onMapClick={handleMapClick} /> */}
-        {selectedLocation && (
-          <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-            <div className="bg-gray-900 rounded-lg shadow-2xl p-6 w-full max-w-md mx-4 border-2 border-gray-700">
-              <ReportForm location={selectedLocation} onSubmit={handleNewIssue} />
-            </div>
-          </div>
-        )}
-      </div>
-    </main>
+    <div className="w-full overflow-x-hidden">
+      {/* Section 1: Hero */}
+      <section className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-white text-center px-6">
+        <motion.h1
+          initial={{ opacity: 0, y: -30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8 }}
+          className="text-5xl md:text-6xl font-bold text-blue-800"
+        >
+          AccessMap: School Edition
+        </motion.h1>
+        <motion.p
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1, delay: 0.2 }}
+          className="mt-6 text-lg md:text-xl max-w-2xl text-gray-700"
+        >
+          A collaborative campus map where students tag and describe accessibility
+          challenges — stairs without ramps, broken elevators, or inaccessible club
+          events. GenAI suggests inclusive event descriptions and accessibility
+          improvements.
+        </motion.p>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.2, delay: 0.4 }}
+          className="mt-8"
+        >
+          <button
+            className="rounded-2xl px-6 py-3 text-lg shadow-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition"
+            onClick={() => router.push("/map")}
+          >
+            View the Map
+          </button>
+        </motion.div>
+      </section>
+      {/* ...rest of the file unchanged... */}
+    </div>
   );
 }
