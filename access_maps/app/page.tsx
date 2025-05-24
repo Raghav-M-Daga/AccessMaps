@@ -2,18 +2,19 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+import styles from "./HomePage.module.css";
 
 export default function HomePage() {
   const router = useRouter();
   return (
-    <div className="w-full overflow-x-hidden">
+    <div className={styles.wrapper}>
       {/* Section 1: Hero */}
-      <section className="h-screen w-full flex flex-col items-center justify-center bg-gradient-to-br from-blue-100 to-white text-center px-6">
+      <section className={styles.heroSection}>
         <motion.h1
           initial={{ opacity: 0, y: -30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-5xl md:text-6xl font-bold text-blue-800"
+          className={styles.heroTitle}
         >
           AccessMap: School Edition
         </motion.h1>
@@ -21,7 +22,7 @@ export default function HomePage() {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="mt-6 text-lg md:text-xl max-w-2xl text-gray-700"
+          className={styles.heroDescription}
         >
           A collaborative campus map where students tag and describe accessibility
           challenges — stairs without ramps, broken elevators, or inaccessible club
@@ -32,10 +33,10 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.2, delay: 0.4 }}
-          className="mt-8"
+          className={styles.heroButtonWrapper}
         >
           <button
-            className="rounded-2xl px-6 py-3 text-lg shadow-lg bg-blue-600 text-white font-bold hover:bg-blue-700 transition"
+            className={styles.heroButton}
             onClick={() => router.push("/map")}
           >
             View the Map

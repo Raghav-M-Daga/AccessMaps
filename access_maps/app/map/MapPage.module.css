@@ -1,0 +1,53 @@
+.main {
+  min-height: 100vh;
+  width: 100%;
+  height: 75%;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  height: 75%;
+}
+
+.mapWrapper {
+  position: relative;
+  width: 100%;
+  height: 75%;
+}
+
+.resetButton {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.5rem;
+  background: linear-gradient(to right, #ef4444, #ec4899);
+  color: #fff;
+  font-weight: bold;
+  border-radius: 9999px;
+  box-shadow: 0 4px 24px rgba(236, 72, 153, 0.15);
+  border: 2px solid #fff;
+  transition: background 0.2s;
+  outline: none;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.resetButton:hover {
+  background: linear-gradient(to right, #dc2626, #db2777);
+}
+.resetButtonContent {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.resetButtonIcon {
+  width: 1.25rem;
+  height: 1.25rem;
+} 

@@ -4,6 +4,7 @@ import dynamic from 'next/dynamic';
 import { useEffect, useState, useRef } from 'react';
 import ReportForm from '@/componenets/ReportForm/ReportForm';
 import { Issue } from '@/componenets/types';
+import styles from './MapPage.module.css';
 
 const Map = dynamic(() => import('@/componenets/Map'), { ssr: false });
 
@@ -53,9 +54,9 @@ export default function Home() {
   ];
 
   return (
-    <main className="min-h-screen w-full bg-white flex flex-col items-center justify-center">
-      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', width: '100%' }}>
-        <div ref={mapContainerRef} className="relative w-full">
+    <main className={styles.main}>
+      <div className={styles.container}>
+        <div ref={mapContainerRef} className={styles.mapWrapper}>
           <Map
             issues={pinsToShow}
             onMapClick={handleMapClick}
@@ -67,14 +68,14 @@ export default function Home() {
         </div>
 
         <button
-          className="mt-6 px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-bold rounded-full shadow-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 border-2 border-white focus:outline-none focus:ring-4 focus:ring-pink-200"
+          className={styles.resetButton}
           onClick={() => {
             setIssues([]);
             localStorage.removeItem('issues');
           }}
         >
-          <span className="inline-flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+          <span className={styles.resetButtonContent}>
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className={styles.resetButtonIcon}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
             </svg>
             Reset Pins

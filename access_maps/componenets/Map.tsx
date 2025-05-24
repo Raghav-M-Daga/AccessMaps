@@ -73,8 +73,8 @@ export default function Map({ issues, onMapClick, pendingLocation, renderReportF
     // Add report markers
     issues.forEach((issue) => {
       const el = document.createElement('div');
-      const pinColor = issue.color === 'red' ? '#d00' : issue.color === 'green' ? '#0d0' : '#00d';
-      const strokeColor = issue.color === 'red' ? '#900' : issue.color === 'green' ? '#090' : '#009';
+      const pinColor = issue.color === 'red' ? '#ff0000' : issue.color === 'green' ? '#17cf40' : '#00d';
+      const strokeColor = issue.color === 'red' ? '#cc0000' : issue.color === 'green' ? '#17cf40' : '#009';
       el.innerHTML = `
         <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
           <ellipse cx="18" cy="44" rx="8" ry="4" fill="#0003"/>
@@ -85,7 +85,7 @@ export default function Map({ issues, onMapClick, pendingLocation, renderReportF
       el.style.transform = 'translate(-50%, -100%)';
 
       const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-        `<div style='font-size:18px;max-width:200px;'>
+        `<div style='font-size:14px;max-width:200px;'>
           <b>${issue.color === 'red' ? 'Issue' : issue.color === 'green' ? 'Accessible' : 'New Report'}:</b><br/>
           ${issue.description}
         </div>`
@@ -131,21 +131,7 @@ export default function Map({ issues, onMapClick, pendingLocation, renderReportF
   return (
     <div
       ref={mapContainer}
-      style={{
-        width: '90vw',
-        height: 'calc(90vw * 9 / 16)',
-        maxWidth: '1600px',
-        maxHeight: '80vh',
-        minWidth: '320px',
-        minHeight: '200px',
-        borderRadius: 16,
-        boxShadow: '0 2px 16px #0002',
-        border: '2px solid #ccc',
-        overflow: 'hidden',
-        margin: '0 auto',
-        background: '#eee',
-        display: 'block',
-      }}
+      className={"mapContainer"}
     />
   );
 }

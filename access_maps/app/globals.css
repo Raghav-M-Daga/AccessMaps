@@ -1,23 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  color: #000;
-  background: #fff;
+  margin: 0;
+  padding: 0;
   font-family: Arial, Helvetica, sans-serif;
+  background: #fff;
+  color: #111;
 }
 
 .mapboxgl-canvas {

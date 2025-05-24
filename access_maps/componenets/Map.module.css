@@ -1,0 +1,15 @@
+.mapContainer {
+  width: 90vw;
+  height: calc(90vw * 9 / 16);
+  max-width: 1600px;
+  max-height: 80vh;
+  min-width: 320px;
+  min-height: 200px;
+  border-radius: 16px;
+  box-shadow: 0 2px 16px #0002;
+  border: 2px solid #ccc;
+  overflow: hidden;
+  margin: 0 auto;
+  background: #eee;
+  display: block;
+} 

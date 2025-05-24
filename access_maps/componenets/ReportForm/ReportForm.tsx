@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Issue } from '@/componenets/types';
+import styles from "./ReportForm.module.css";
 
 interface Props {
   location: { lng: number; lat: number };
@@ -10,36 +11,48 @@ interface Props {
 
 export default function ReportForm({ location, onSubmit }: Props) {
   const [desc, setDesc] = useState('');
+  const [color, setColor] = useState<'red' | 'green'>('red');
+
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    onSubmit({ location, description: desc, color });
+    setDesc('');
+    setColor('red');
+  };
 
   return (
-    <div className="space-y-6 flex flex-col items-center bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md border border-gray-200">
-      <h2 className="text-3xl font-extrabold text-gray-900 mb-2 font-sans text-center">Report Accessibility</h2>
-      <textarea
-        value={desc}
-        onChange={(e) => setDesc(e.target.value)}
-        placeholder="Describe the accessibility issue..."
-        className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-pink-400 focus:ring-2 focus:ring-pink-200 min-h-[120px] bg-gray-50 text-gray-900 placeholder-gray-400 text-lg font-sans resize-none transition"
-      />
-      <div className="flex gap-4 w-full">
-        <button
-          onClick={() => {
-            onSubmit({ location, description: desc, color: 'red' });
-            setDesc('');
-          }}
-          className="flex-1 bg-red-500 text-white px-4 py-2 rounded-lg"
-        >
-          Issue
-        </button>
-        <button
-          onClick={() => {
-            onSubmit({ location, description: desc, color: 'green' });
-            setDesc('');
-          }}
-          className="flex-1 bg-green-500 text-white px-4 py-2 rounded-lg"
-        >
-          Accessible
-        </button>
-      </div>
+    <div className={styles.container}>
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h2 className={styles.title}>Report an Accessibility Issue</h2>
+        <textarea
+          className={styles.textarea}
+          value={desc}
+          onChange={(e) => setDesc(e.target.value)}
+          placeholder="Describe the issue or accessibility feature..."
+          required
+        />
+        <div className={styles.buttonRow}>
+          <button
+            type="submit"
+            className={styles.redButton}
+            onClick={() => setColor('red')}
+          >
+            Mark as Issue
+          </button>
+          <button
+            type="button"
+            className={styles.greenButton}
+            onClick={() => {
+              setColor('green');
+              onSubmit({ location, description: desc, color: 'green' });
+              setDesc('');
+              setColor('red');
+            }}
+          >
+            Mark as Accessible
+          </button>
+        </div>
+      </form>
     </div>
   );
 }
