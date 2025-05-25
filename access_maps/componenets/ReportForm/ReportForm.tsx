@@ -23,7 +23,7 @@ export default function ReportForm({ location, onSubmit }: Props) {
   return (
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit}>
-        <h2 className={styles.title}>Report an Accessibility Issue</h2>
+        <h2 className={styles.title}>Report Accessibility</h2>
         <textarea
           className={styles.textarea}
           value={desc}

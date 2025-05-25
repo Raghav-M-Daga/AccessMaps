@@ -84,10 +84,37 @@ export default function Map({ issues, onMapClick, pendingLocation, renderReportF
       `;
       el.style.transform = 'translate(-50%, -100%)';
 
-      const popup = new mapboxgl.Popup({ offset: 25 }).setHTML(
-        `<div style='font-size:14px;max-width:200px;'>
-          <b>${issue.color === 'red' ? 'Issue' : issue.color === 'green' ? 'Accessible' : 'New Report'}:</b><br/>
-          ${issue.description}
+      const popup = new mapboxgl.Popup({ 
+        offset: 35,
+        className: 'custom-popup'
+      }).setHTML(
+        `<div style='
+          background: #fff;
+          border-radius: 1rem;
+          box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+          padding: 1rem;
+          width: 280px;
+          border: 1px solid #e5e7eb;
+          font-family: Arial, Helvetica, sans-serif;
+        '>
+          <h3 style='
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: #111827;
+            margin: 0 0 0 0;
+            text-align: center;
+          '>
+            ${issue.color === 'red' ? 'Issue' : issue.color === 'green' ? 'Accessible' : 'New Report'}
+          </h3>
+          <p style='
+            font-size: 1rem;
+            color: #374151;
+            line-height: 1.5;
+            margin: 0;
+            text-align: center;
+          '>
+            ${issue.description}
+          </p>
         </div>`
       );
 
@@ -114,7 +141,12 @@ export default function Map({ issues, onMapClick, pendingLocation, renderReportF
       const root = ReactDOM.createRoot(popupNode);
       root.render(renderReportForm(pendingLocation));
 
-      reportPopupRef.current = new mapboxgl.Popup({ offset: 25, closeOnClick: false })
+      reportPopupRef.current = new mapboxgl.Popup({ 
+        offset: [-32,-35],
+        closeOnClick: false,
+        closeButton: false,
+        className: 'custom-popup'
+      })
         .setLngLat([pendingLocation.lng, pendingLocation.lat])
         .setDOMContent(popupNode)
         .addTo(mapRef.current);

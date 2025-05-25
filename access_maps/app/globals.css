@@ -11,3 +11,27 @@ body {
   width: 100% !important;
   height: 100% !important;
 }
+
+/* Custom popup styling */
+.custom-popup .mapboxgl-popup-content {
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  border-radius: 0;
+}
+
+.custom-popup .mapboxgl-popup-tip {
+  display: none;
+}
+
+/* Hide the default popup close button */
+.custom-popup .mapboxgl-popup-close-button {
+  display: none;
+}
+
+/* Ensure the popup container is centered */
+.custom-popup {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
