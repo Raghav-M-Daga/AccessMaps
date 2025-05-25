@@ -24,6 +24,7 @@ export default function ReportForm({ location, onSubmit }: Props) {
     <div className={styles.container}>
       <form className={styles.form} onSubmit={handleSubmit}>
         <h2 className={styles.title}>Report Accessibility</h2>
+        
         <textarea
           className={styles.textarea}
           value={desc}
@@ -31,6 +32,21 @@ export default function ReportForm({ location, onSubmit }: Props) {
           placeholder="Describe the issue or accessibility feature..."
           required
         />
+
+        {/* Suggested Buttons – replace description */}
+        <div className="flex flex-row flex-wrap gap-2 mb-4 justify-center">
+          {['ramp', 'elevator', 'door'].map((phrase) => (
+            <button
+              key={phrase}
+              type="button"
+              onClick={() => setDesc(phrase)}
+              className={styles.whiteButton}
+            >
+              {phrase}
+            </button>
+          ))}
+        </div>
+
         <div className={styles.buttonRow}>
           <button
             type="submit"

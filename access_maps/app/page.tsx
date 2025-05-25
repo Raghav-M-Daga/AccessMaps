@@ -24,10 +24,9 @@ export default function HomePage() {
           transition={{ duration: 1, delay: 0.2 }}
           className={styles.heroDescription}
         >
-          A collaborative campus map where students tag and describe accessibility
-          challenges — stairs without ramps, broken elevators, or inaccessible club
-          events. GenAI suggests inclusive event descriptions and accessibility
-          improvements.
+       A collaborative campus map where students can tag and describe accessibility
+          challenges to help make the campus more accessible for everyone, even people
+          with disabilities.
         </motion.p>
         <motion.div
           initial={{ opacity: 0 }}

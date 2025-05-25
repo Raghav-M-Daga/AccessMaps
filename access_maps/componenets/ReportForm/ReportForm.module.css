@@ -90,3 +90,22 @@
 .greenButton:hover {
   background: #128c2c;
 } 
+.whiteButton {
+  flex: 1;
+  background: #ffffff;
+  color: #000000;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 0.95rem;
+  border: 2px solid black;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin: -2.5rem 0.5rem;
+}
+.whiteButton:hover {
+  background: #bcbcbc;
+}
+.whiteButtons {
+  margin: 0rem;
+}

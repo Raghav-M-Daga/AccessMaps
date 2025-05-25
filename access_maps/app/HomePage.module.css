@@ -10,16 +10,25 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #32f3ff 0%, #fff 100%);
+  background: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0)), url('assets/background.svg'); 
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   text-align: center;
   padding-left: 1.5rem;
   padding-right: 1.5rem;
+  position: relative;
 }
 
 .heroTitle {
-  font-size: 3rem;
-  font-weight: bold;
-  color: #32f3ff;
+  font-size: 6rem;
+  font-weight: 800;
+  color: #031161;
+  text-align: center;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
+  font-family: 'DM Serif Text', serif;
 }
 
 @media (min-width: 768px) {
@@ -30,9 +39,13 @@
 
 .heroDescription {
   margin-top: 1.5rem;
-  font-size: 1.125rem;
+  font-size: 2rem;
   max-width: 40rem;
   color: #334155;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  font-family: 'DM Serif Text', serif;
 }
 
 @media (min-width: 768px) {
@@ -50,12 +63,15 @@
   padding: 0.75rem 1.5rem;
   font-size: 1.125rem;
   box-shadow: 0 4px 24px rgba(30, 64, 175, 0.15);
-  background: #32f3ff;
+  background: #040a38;
   color: #fff;
-  font-weight: bold;
+  font-weight: 400;
   transition: background 0.2s;
   cursor: pointer;
+  font-family: 'DM Serif Text', serif;
 }
+
 .heroButton:hover {
-  background: #1d4ed8;
+  background: #dfe8ff;
+  color: #031161;
 } 
