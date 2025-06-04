@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Issue } from '@/componenets/types';
+import { useAuth } from '@/componenets/AuthProvider';
 import styles from "./ReportForm.module.css";
 
 interface Props {
@@ -12,10 +13,24 @@ interface Props {
 export default function ReportForm({ location, onSubmit }: Props) {
   const [desc, setDesc] = useState('');
   const [color, setColor] = useState<'red' | 'green'>('red');
+  const { user, isInitialized } = useAuth();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    onSubmit({ location, description: desc, color });
+    
+    if (!isInitialized || !user) {
+      alert('Please sign in to add pins');
+      return;
+    }
+
+    onSubmit({
+      location,
+      description: desc,
+      color,
+      userId: user.uid,
+      createdAt: new Date().toISOString()
+    });
+    
     setDesc('');
     setColor('red');
   };
@@ -45,13 +60,18 @@ export default function ReportForm({ location, onSubmit }: Props) {
               {phrase}
             </button>
           ))}
-        </div>
-
-        <div className={styles.buttonRow}>
+        </div>        <div className={styles.buttonRow}>
           <button
-            type="submit"
+            type="button"
             className={styles.redButton}
-            onClick={() => setColor('red')}
+            onClick={() => {
+              if (!desc.trim()) {
+                alert('Please add a description');
+                return;
+              }
+              onSubmit({ location, description: desc, color: 'red' });
+              setDesc('');
+            }}
           >
             Mark as Issue
           </button>
@@ -59,10 +79,12 @@ export default function ReportForm({ location, onSubmit }: Props) {
             type="button"
             className={styles.greenButton}
             onClick={() => {
-              setColor('green');
+              if (!desc.trim()) {
+                alert('Please add a description');
+                return;
+              }
               onSubmit({ location, description: desc, color: 'green' });
               setDesc('');
-              setColor('red');
             }}
           >
             Mark as Accessible

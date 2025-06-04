@@ -12,4 +12,38 @@
   margin: 0 auto;
   background: #eee;
   display: block;
-} 
+}
+
+:global(.custom-marker) {
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+:global(.custom-marker:hover) {
+  transform: scale(1.1);
+}
+
+:global(.mapboxgl-popup) {
+  z-index: 2;
+}
+
+:global(.mapboxgl-popup-content) {
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+:global(.mapboxgl-popup-close-button) {
+  padding: 6px;
+  right: 6px;
+  top: 6px;
+  color: #6b7280;
+  font-size: 20px;
+  line-height: 1;
+}
+
+:global(.mapboxgl-popup-close-button:hover) {
+  background: #f3f4f6;
+  color: #374151;
+}

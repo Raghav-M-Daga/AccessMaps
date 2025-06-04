@@ -74,4 +74,31 @@
 .heroButton:hover {
   background: #dfe8ff;
   color: #031161;
-} 
+}
+
+.loading {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.errorText {
+  color: #e53e3e;
+  margin-top: 0.5rem;
+  text-align: center;
+  font-size: 0.875rem;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.logoutButton {
+  background: #e53e3e;
+}
+
+.logoutButton:hover {
+  background: #f56565;
+  color: white;
+}
