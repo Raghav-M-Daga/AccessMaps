@@ -1,8 +1,8 @@
 .mapContainer {
   width: 90vw;
   height: calc(90vw * 9 / 16);
-  max-width: 1600px;
-  max-height: 80vh;
+  max-width: 100%;
+  max-height: 100%;
   min-width: 320px;
   min-height: 200px;
   border-radius: 16px;
@@ -14,36 +14,205 @@
   display: block;
 }
 
-:global(.custom-marker) {
+.marker {
   cursor: pointer;
   transition: transform 0.2s;
 }
 
-:global(.custom-marker:hover) {
+.marker:hover {
   transform: scale(1.1);
 }
 
-:global(.mapboxgl-popup) {
+.marker.editing {
+  cursor: grab;
+}
+
+.marker.editing:active {
+  cursor: grabbing;
+}
+
+.popup {
   z-index: 2;
 }
 
-:global(.mapboxgl-popup-content) {
+.popupContent {
   padding: 0;
+}
+
+.pinPopup {
+  position: relative !important;
+  z-index: 1 !important;
+  min-width: 280px;
+  max-width: 320px;
+  background: white;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-:global(.mapboxgl-popup-close-button) {
-  padding: 6px;
-  right: 6px;
-  top: 6px;
-  color: #6b7280;
-  font-size: 20px;
-  line-height: 1;
+.popupTitle {
+  margin: 0;
+  padding: 12px 40px 12px 16px;
+  font-size: 1rem;
+  font-weight: 600;
+  text-align: left;
+  color: white;
+  position: relative;
 }
 
-:global(.mapboxgl-popup-close-button:hover) {
-  background: #f3f4f6;
+.popupTitle.issue {
+  background: linear-gradient(to right, #dc2626, #ef4444);
+}
+
+.popupTitle.feature {
+  background: linear-gradient(to right, #15803d, #22c55e);
+}
+
+.popupDescription {
+  margin: 0;
+  padding: 16px;
   color: #374151;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  background: white;
 }
+
+.popupActions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+  align-items: center;
+}
+
+/* Wrapper class for Mapbox elements */
+.mapboxWrapper :global(.mapboxgl-popup) {
+  z-index: 2;
+}
+
+.mapboxWrapper :global(.mapboxgl-popup-content) {
+  padding: 0 !important;
+  border-radius: 12px !important;
+  border: none !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+  overflow: hidden !important;
+}
+
+.mapboxWrapper :global(.mapboxgl-popup-close-button) {
+  padding: 8px !important;
+  right: 8px !important;
+  top: 8px !important;
+  color: #6b7280 !important;
+  font-size: 24px !important;
+  line-height: 1 !important;
+  z-index: 2 !important;
+  border-radius: 6px !important;
+}
+
+.mapboxWrapper :global(.mapboxgl-popup-close-button:hover) {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  color: #374151 !important;
+}
+
+.voteWrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: auto;
+}
+
+.voteCount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #4b5563;
+  font-size: 0.875rem;
+  padding: 4px 8px;
+  background-color: #f3f4f6;
+  border-radius: 4px;
+}
+
+.voteCount svg {
+  width: 16px;
+  height: 16px;
+}
+
+.upvoteButton {
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  background-color: white;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-width: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upvoteButton:hover:not(:disabled) {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #111827;
+}
+
+.upvoteButton:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.upvoteButton.upvoted {
+  background-color: #f3f4f6;
+  border-color: #9ca3af;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.editButton,
+.deleteButton {
+  background-color: black;
+  color: white;
+  padding: 6px 12px;
+  font-size: 0.875rem; /* 14px */
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  margin-right: 8px;
+  min-width: 70px;
+  text-align: center;
+}
+
+.editButton:hover,
+.deleteButton:hover {
+  background-color: #1a1a1a;
+}
+
+.homeButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 150px; /* adjust down from top */
+  left: 30px;
+  background-color: white;
+  color: black;
+  padding: 20px 20px;
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  z-index: 900;
+  transition: all 0.2s ease;
+}
+
+.homeButton:hover {
+  background-color: #f2f2f2;
+  transform: scale(1.05);
+}
+

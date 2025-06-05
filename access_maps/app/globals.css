@@ -35,3 +35,8 @@ body {
   justify-content: center;
   align-items: center;
 }
+
+.custom-marker {
+  cursor: pointer;
+  transition: transform 0.2s;
+}

@@ -1,20 +1,38 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { getAuth, onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut, User, UserCredential } from 'firebase/auth';
+import { 
+  getAuth, 
+  onAuthStateChanged, 
+  signInWithPopup, 
+  GoogleAuthProvider, 
+  signOut, 
+  User, 
+  UserCredential,
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword
+} from 'firebase/auth';
 import { app } from '../firebaseConfig';
 
 const AuthContext = createContext<{
   user: User | null;
   isLoading: boolean;
   isInitialized: boolean;
-  login: () => Promise<UserCredential>;
+  loginWithGoogle: () => Promise<UserCredential>;
+  loginWithEmail: (email: string, password: string) => Promise<UserCredential>;
+  registerWithEmail: (email: string, password: string) => Promise<UserCredential>;
   logout: () => Promise<void>;
 }>({
   user: null,
   isLoading: true,
   isInitialized: false,
-  login: async () => {
+  loginWithGoogle: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  loginWithEmail: async () => {
+    throw new Error('AuthContext not initialized');
+  },
+  registerWithEmail: async () => {
     throw new Error('AuthContext not initialized');
   },
   logout: async () => {
@@ -57,7 +75,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [auth]);
 
-  const login = async (): Promise<UserCredential> => {
+  const loginWithGoogle = async (): Promise<UserCredential> => {
     setIsLoading(true);
     try {
       const provider = new GoogleAuthProvider();
@@ -67,7 +85,25 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const logout = async () => {
+  const loginWithEmail = async (email: string, password: string): Promise<UserCredential> => {
+    setIsLoading(true);
+    try {
+      return await signInWithEmailAndPassword(auth, email, password);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const registerWithEmail = async (email: string, password: string): Promise<UserCredential> => {
+    setIsLoading(true);
+    try {
+      return await createUserWithEmailAndPassword(auth, email, password);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async (): Promise<void> => {
     setIsLoading(true);
     try {
       await signOut(auth);
@@ -77,7 +113,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isLoading, isInitialized, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        isLoading,
+        isInitialized,
+        loginWithGoogle,
+        loginWithEmail,
+        registerWithEmail,
+        logout,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );

@@ -1,0 +1,284 @@
+'use client';
+
+import React, { useEffect, useRef, useCallback, useState } from 'react';
+import mapboxgl from 'mapbox-gl';
+import ReactDOM from 'react-dom/client';
+import { Issue } from '@/componenets/types';
+import { useAuth } from './AuthProvider';
+import 'mapbox-gl/dist/mapbox-gl.css';
+
+type Props = {
+  issues: Issue[];
+  onMapClick: (location: { lng: number; lat: number; x: number; y: number }) => void;
+  pendingLocation: { lng: number; lat: number } | null;
+  onDeletePin?: (pinId: string, userId: string) => void;
+  onEditLocation?: (pinId: string, newLocation: { lng: number; lat: number }) => void;
+  renderReportForm: (location: { lng: number; lat: number }) => React.ReactNode;
+};
+
+export default function Map({ 
+  issues, 
+  onMapClick, 
+  pendingLocation, 
+  onDeletePin,
+  onEditLocation, 
+  renderReportForm 
+}: Props) {
+  const { user, isInitialized } = useAuth();
+  const mapContainer = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const markersRef = useRef<mapboxgl.Marker[]>([]);
+  const reportPopupRef = useRef<mapboxgl.Popup | null>(null);
+  const [editingMarkerId, setEditingMarkerId] = useState<string | null>(null);
+  const [editingMarkerOriginalPosition, setEditingMarkerOriginalPosition] = useState<mapboxgl.LngLat | null>(null);
+
+  const cancelEditing = useCallback((marker: mapboxgl.Marker) => {
+    if (editingMarkerOriginalPosition) {
+      marker.setLngLat(editingMarkerOriginalPosition);
+    }
+    marker.setDraggable(false);
+    marker.getElement().classList.remove('editing');
+    setEditingMarkerId(null);
+    setEditingMarkerOriginalPosition(null);
+  }, [editingMarkerOriginalPosition]);
+
+  // Close all popups except for the one being opened
+  const closeOtherPopups = useCallback((currentMarker: mapboxgl.Marker) => {
+    markersRef.current.forEach(marker => {
+      if (marker !== currentMarker) {
+        marker.getPopup()?.remove();
+      }
+    });
+  }, []);
+
+  // Handle escape key
+  useEffect(() => {
+    const handleEscKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        if (pendingLocation) {
+          reportPopupRef.current?.remove();
+          reportPopupRef.current = null;
+        }
+        if (editingMarkerId) {
+          const marker = markersRef.current.find(m => m.getElement().dataset.id === editingMarkerId);
+          if (marker) {
+            cancelEditing(marker);
+          }
+        }
+      }
+    };
+
+    window.addEventListener('keydown', handleEscKey);
+    return () => window.removeEventListener('keydown', handleEscKey);
+  }, [pendingLocation, editingMarkerId, cancelEditing]);
+
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current || mapRef.current) return;
+
+    const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
+    if (!token) {
+      console.error('Mapbox token not found in environment variables');
+      return;
+    }
+
+    mapboxgl.accessToken = token;
+    
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [-122.01635, 37.56464],
+      zoom: 17.2,
+    });
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
+  }, []);
+
+  // Handle map clicks
+  const handleMapClick = useCallback((e: mapboxgl.MapMouseEvent) => {
+    if (!mapContainer.current) return;
+    
+    if (!(e.originalEvent?.target instanceof HTMLElement)) return;
+    if (!e.originalEvent.target.classList.contains('mapboxgl-canvas')) return;
+    
+    if (!isInitialized || !user) {
+      return;
+    }
+
+    const rect = mapContainer.current.getBoundingClientRect();
+    const x = e.originalEvent.clientX - rect.left;
+    const y = e.originalEvent.clientY - rect.top;
+    onMapClick({ lng: e.lngLat.lng, lat: e.lngLat.lat, x, y });
+  }, [onMapClick, user, isInitialized]);
+
+  // Set up click listener
+  useEffect(() => {
+    if (!mapRef.current) return;
+    
+    mapRef.current.on('click', handleMapClick);
+    return () => {
+      mapRef.current?.off('click', handleMapClick);
+    };
+  }, [handleMapClick]);
+
+  // Update markers
+  useEffect(() => {
+    if (!mapRef.current || !mapRef.current.loaded()) return;
+
+    markersRef.current.forEach(marker => marker.remove());
+    markersRef.current = [];
+
+    issues.forEach((issue) => {
+      if (!issue?.location || typeof issue.location.lng !== 'number' || typeof issue.location.lat !== 'number') {
+        return;
+      }
+
+      const el = document.createElement('div');
+      el.className = 'custom-marker';
+      el.dataset.id = issue.id || '';
+      
+      const pinColor = issue.color === 'red' ? '#dc2626' : '#15803d';
+      el.innerHTML = `
+        <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 0C8.075 0 0 8.075 0 18c0 8.45 13.05 23.425 17.075 27.9c1.075 1.2 2.775 1.2 3.85 0C24.95 41.425 38 26.45 38 18c0-9.925-8.075-18-18-18z" fill="${pinColor}"/>
+          <path d="M18 25.5c-4.125 0-7.5-3.375-7.5-7.5S13.875 10.5 18 10.5s7.5 3.375 7.5 7.5-3.375 7.5-7.5 7.5z" fill="white"/>
+        </svg>
+      `;
+
+      const marker = new mapboxgl.Marker({ element: el })
+        .setLngLat([issue.location.lng, issue.location.lat]);
+
+      const popup = new mapboxgl.Popup({
+        offset: [0, -30],
+        closeButton: true,
+        closeOnClick: false,
+        maxWidth: '300px'
+      });
+
+      const popupRoot = document.createElement('div');
+      popupRoot.className = 'pin-popup';
+
+      const updatePopupContent = (isEditing: boolean) => {
+        const popupContent = popupRoot.querySelector('.popup-content');
+        if (popupContent) {
+          popupContent.innerHTML = `
+            <h3 class="popup-title">${issue.color === 'red' ? '⚠️ Accessibility Issue' : '✓ Accessible Feature'}</h3>
+            <p class="popup-description">${issue.description}</p>
+            ${issue.userId === user?.uid && issue.id ? `
+              <div class="popup-actions">
+                ${isEditing ? `
+                  <div class="editing-instructions">Drag the pin to a new location</div>
+                  <button class="save-button">Save Location</button>
+                  <button class="cancel-button">Cancel</button>
+                ` : `
+                  <button class="edit-button">Edit Location</button>
+                  <button class="delete-button">Delete Pin</button>
+                `}
+              </div>
+            ` : ''}
+          `;
+
+          if (isEditing) {
+            const saveButton = popupContent.querySelector('.save-button');
+            if (saveButton) {
+              saveButton.addEventListener('click', () => {
+                const newLocation = marker.getLngLat();
+                if (onEditLocation && issue.id) {
+                  onEditLocation(issue.id, newLocation);
+                  marker.setDraggable(false);
+                  marker.getElement().classList.remove('editing');
+                  setEditingMarkerId(null);
+                  setEditingMarkerOriginalPosition(null);
+                  updatePopupContent(false);
+                }
+              });
+            }
+
+            const cancelButton = popupContent.querySelector('.cancel-button');
+            if (cancelButton) {
+              cancelButton.addEventListener('click', () => {
+                cancelEditing(marker);
+                updatePopupContent(false);
+              });
+            }
+          } else {
+            const editButton = popupContent.querySelector('.edit-button');
+            if (editButton) {
+              editButton.addEventListener('click', () => {
+                // Store original position
+                setEditingMarkerOriginalPosition(marker.getLngLat());
+                setEditingMarkerId(issue.id || null);
+                marker.setDraggable(true);
+                marker.getElement().classList.add('editing');
+                updatePopupContent(true);
+              });
+            }
+
+            const deleteButton = popupContent.querySelector('.delete-button');
+            if (deleteButton) {
+              deleteButton.addEventListener('click', () => {
+                if (issue.id && issue.userId && onDeletePin) {
+                  onDeletePin(issue.id, issue.userId);
+                }
+              });
+            }
+          }
+        }
+      };
+
+      updatePopupContent(false);
+      popup.setDOMContent(popupRoot);
+      marker.setPopup(popup);
+      marker.addTo(mapRef.current!);
+      markersRef.current.push(marker);
+
+      // Close other popups when this one is opened
+      marker.getElement().addEventListener('click', () => {
+        closeOtherPopups(marker);
+      });
+    });
+  }, [issues, user, onDeletePin, onEditLocation, closeOtherPopups, cancelEditing]);
+
+  // Handle pending location popup
+  useEffect(() => {
+    if (!mapRef.current) return;
+
+    if (reportPopupRef.current) {
+      reportPopupRef.current.remove();
+      reportPopupRef.current = null;
+    }
+
+    if (pendingLocation) {
+      const popupNode = document.createElement('div');
+      const root = ReactDOM.createRoot(popupNode);
+      root.render(renderReportForm(pendingLocation));
+
+      reportPopupRef.current = new mapboxgl.Popup({
+        offset: [-32, -35],
+        closeOnClick: false,
+        closeButton: false
+      })
+        .setLngLat([pendingLocation.lng, pendingLocation.lat])
+        .setDOMContent(popupNode)
+        .addTo(mapRef.current);
+    }
+
+    return () => {
+      if (reportPopupRef.current) {
+        reportPopupRef.current.remove();
+        reportPopupRef.current = null;
+      }
+    };
+  }, [pendingLocation, renderReportForm]);
+
+  return (
+    <div
+      ref={mapContainer}
+      className={"mapContainer"}
+      style={{ width: '100%', height: '100%' }}
+    />
+  );
+}

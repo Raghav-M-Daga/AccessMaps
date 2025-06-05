@@ -1,26 +1,34 @@
 'use client';
 
+import React, { useEffect, useRef, useCallback } from 'react';
 import mapboxgl from 'mapbox-gl';
-import { useEffect, useRef, useCallback } from 'react';
+import ReactDOM from 'react-dom/client';
 import { Issue } from '@/componenets/types';
 import { useAuth } from './AuthProvider';
 import 'mapbox-gl/dist/mapbox-gl.css';
-import ReactDOM from "react-dom/client";
+import styles from './Map.module.css';
 
 type Props = {
   issues: Issue[];
   onMapClick: (location: { lng: number; lat: number; x: number; y: number }) => void;
   pendingLocation: { lng: number; lat: number } | null;
   onDeletePin?: (pinId: string, userId: string) => void;
-  renderReportForm: (location: { lng: number; lat: number }) => React.ReactNode;
+  onEditLocation?: (pinId: string, newLocation: { lng: number; lat: number }) => void;
+  upvoteIssue: (pinId: string, userId: string) => Promise<void>;
+  renderReportForm: (
+    location: { lng: number; lat: number },
+    existingIssue?: Issue | null
+  ) => React.ReactNode;
 };
 
-export default function Map({ 
-  issues, 
-  onMapClick, 
-  pendingLocation, 
-  onDeletePin, 
-  renderReportForm 
+export default function Map({
+  issues,
+  onMapClick,
+  pendingLocation,
+  onDeletePin,
+  onEditLocation,
+  upvoteIssue,
+  renderReportForm
 }: Props) {
   const { user, isInitialized } = useAuth();
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -28,231 +36,329 @@ export default function Map({
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const reportPopupRef = useRef<mapboxgl.Popup | null>(null);
 
-  // Handle escape key
+  const closePopup = () => {
+    if (reportPopupRef.current) {
+      reportPopupRef.current.remove();
+      reportPopupRef.current = null;
+    }
+  };
+
+  const closeAllPopups = () => {
+    markersRef.current.forEach((marker) => {
+      marker.getPopup()?.remove();
+    });
+    closePopup();
+  }
+
+  const handleEscape = useCallback((e: KeyboardEvent) => {
+    if (e.key === 'Escape') {
+      closeAllPopups();
+    }
+  }, []);
+
   useEffect(() => {
-    const handleEscKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && pendingLocation) {
-        console.log('Escape pressed, canceling pin creation');
-        reportPopupRef.current?.remove();
-        reportPopupRef.current = null;
+    document.addEventListener('keydown', handleEscape);
+    return () => document.removeEventListener('keydown', handleEscape);
+  }, [handleEscape]);
+
+  const updatePopupContent = useCallback(
+    (marker: mapboxgl.Marker, issue: Issue) => {
+      // Create base popup elements
+      const popupRoot = document.createElement('div');
+      popupRoot.className = styles.pinPopup;      const contentDiv = document.createElement('div');
+      contentDiv.className = styles.popupContent;
+
+      const title = document.createElement('h3');
+      const isIssue = issue.color === 'red';
+      title.className = `${styles.popupTitle} ${isIssue ? styles.issue : styles.feature}`;
+      title.textContent = isIssue ? '⚠️ Accessibility Issue' : '✓ Accessible Feature';
+
+      const description = document.createElement('p');
+      description.className = styles.popupDescription;
+      description.textContent = issue.description;
+
+      contentDiv.appendChild(title);
+      contentDiv.appendChild(description);
+      popupRoot.appendChild(contentDiv);
+
+      // Create actions section
+      const actionsDiv = document.createElement('div');
+      actionsDiv.className = styles.popupActions;
+
+      // Create voting section - always show vote count
+      const voteWrapper = document.createElement('div');
+      voteWrapper.className = styles.voteWrapper;
+      
+      // Create and setup vote count display
+      const voteCount = document.createElement('div');
+      voteCount.className = styles.voteCount;
+      
+      const voteIcon = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      voteIcon.setAttribute('viewBox', '0 0 24 24');
+      voteIcon.setAttribute('width', '18');
+      voteIcon.setAttribute('height', '16');
+      
+      const iconPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      iconPath.setAttribute('d', 'M12 4L2 20h20L12 4zm0 4l6 12H6l6-12z');
+      voteIcon.appendChild(iconPath);
+      
+      const voteSpan = document.createElement('span');
+      voteSpan.textContent = `${typeof issue.upvotes === 'number' ? issue.upvotes : 0}`;
+      
+      voteCount.appendChild(voteIcon);
+      voteCount.appendChild(voteSpan);
+      
+      // Add upvote button if user can vote
+      if (user && issue.id && issue.userId !== user.uid) {
+        const hasVoted = Array.isArray(issue.votedUserIds) && issue.votedUserIds.includes(user.uid);
+        
+        const upvoteButton = document.createElement('button');
+        upvoteButton.textContent = hasVoted ? 'Upvoted' : 'Upvote';
+        upvoteButton.className = `${styles.upvoteButton} ${hasVoted ? styles.upvoted : ''}`;
+        upvoteButton.disabled = hasVoted;
+
+        if (!hasVoted) {          upvoteButton.onclick = async (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // Prevent the click from reaching the map
+            marker.getElement().click(); // Keep the popup open
+            
+            if (!user || !issue.id) return;
+            
+            try {
+              upvoteButton.disabled = true;
+              upvoteButton.textContent = 'Upvoting...';
+              
+              await upvoteIssue(issue.id, user.uid);
+              
+              upvoteButton.textContent = 'Upvoted';
+              upvoteButton.className = `${styles.upvoteButton} ${styles.upvoted}`;
+              voteSpan.textContent = `${(typeof issue.upvotes === 'number' ? issue.upvotes : 0) + 1}`;
+              
+              // Ensure the popup stays open after upvoting
+              marker.togglePopup();
+              marker.togglePopup();
+              
+            } catch (err: any) {
+              console.error('Upvote failed:', err);
+              upvoteButton.disabled = false;
+              upvoteButton.textContent = 'Upvote';
+              alert(err?.message || 'Failed to upvote. Please try again.');
+            }
+            
+            // Prevent event from bubbling up to the map
+            e.stopImmediatePropagation();
+            return false;
+          };
+        }
+        
+        voteWrapper.appendChild(upvoteButton);
       }
-    };
+      
+      voteWrapper.appendChild(voteCount);
+      actionsDiv.appendChild(voteWrapper);
 
-    window.addEventListener('keydown', handleEscKey);
-    return () => window.removeEventListener('keydown', handleEscKey);
-  }, [pendingLocation]);
+      // Add edit/delete if user is the creator
+      if (user && issue.userId === user.uid && issue.id) {
+        const editButton = document.createElement('button');
+        editButton.textContent = 'Edit';
+        editButton.className = styles.editButton;
+        
+        editButton.onclick = (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          onMapClick?.({
+            lng: issue.location.lng,
+            lat: issue.location.lat,
+            x: 0,
+            y: 0
+          });
+        };
 
-  // Initialize map
+        const deleteButton = document.createElement('button');
+        deleteButton.textContent = 'Delete';
+        deleteButton.className = styles.deleteButton;
+        
+        deleteButton.onclick = () => {
+          if (issue.id && issue.userId) {
+            onDeletePin?.(issue.id, issue.userId);
+          }
+        };
+
+        actionsDiv.appendChild(editButton);
+        actionsDiv.appendChild(deleteButton);
+      }
+
+      popupRoot.appendChild(actionsDiv);
+      marker.getPopup()?.setDOMContent(popupRoot);
+    },
+    [user, upvoteIssue, onMapClick, onDeletePin]
+  );
+
+  const closeOtherPopups = useCallback((currentMarker: mapboxgl.Marker) => {
+    markersRef.current.forEach((marker) => {
+      if (marker !== currentMarker) {
+        marker.getPopup()?.remove();
+      }
+    });
+  }, []);
+
   useEffect(() => {
     if (!mapContainer.current || mapRef.current) return;
 
     const token = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
     if (!token) {
-      console.error('Mapbox token not found in environment variables');
+      console.error('Mapbox token not found');
       return;
     }
 
-    try {
-      console.log('Initializing map with token:', token.substring(0, 8) + '...');
-      mapboxgl.accessToken = token;
-      
-      mapRef.current = new mapboxgl.Map({
-        container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/streets-v12',
-        center: [-122.01635, 37.56464],
-        zoom: 17.2,
-      });
+    mapboxgl.accessToken = token;
 
-      mapRef.current.on('load', () => {
-        console.log('Map loaded successfully');
-      });
-    } catch (error) {
-      console.error('Error initializing map:', error);
-    }
+    mapRef.current = new mapboxgl.Map({
+      container: mapContainer.current,
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [-122.01635, 37.56464],
+      zoom: 17.2
+    });
 
     return () => {
-      console.log('Cleaning up map');
       mapRef.current?.remove();
       mapRef.current = null;
     };
   }, []);
 
-  // Handle map clicks
-  const handleMapClick = useCallback((e: mapboxgl.MapMouseEvent) => {
-    if (!mapContainer.current) return;
-    
-    if (!(e.originalEvent?.target instanceof HTMLElement)) return;
-    if (!e.originalEvent.target.classList.contains('mapboxgl-canvas')) return;
-      if (!isInitialized || !user) {
-      // Don't show error message here, let the parent handle auth state
-      return;
-    }
+  const handleMapClick = useCallback(
+    (e: mapboxgl.MapMouseEvent) => {
+      if (!mapContainer.current) return;
+      if (!(e.originalEvent?.target instanceof HTMLElement)) return;
+      if (!e.originalEvent.target.classList.contains('mapboxgl-canvas')) return;
 
-    const rect = mapContainer.current.getBoundingClientRect();
-    const x = e.originalEvent.clientX - rect.left;
-    const y = e.originalEvent.clientY - rect.top;
-    onMapClick({ lng: e.lngLat.lng, lat: e.lngLat.lat, x, y });
-  }, [onMapClick, user, mapContainer]);
+      if (!isInitialized || !user) return;
 
-  // Set up click listener
+      const rect = mapContainer.current.getBoundingClientRect();
+      const x = e.originalEvent.clientX - rect.left;
+      const y = e.originalEvent.clientY - rect.top;
+      onMapClick({ lng: e.lngLat.lng, lat: e.lngLat.lat, x, y });
+    },
+    [onMapClick, user, isInitialized]
+  );
+
   useEffect(() => {
     if (!mapRef.current) return;
-    
     mapRef.current.on('click', handleMapClick);
-    
     return () => {
       mapRef.current?.off('click', handleMapClick);
     };
   }, [handleMapClick]);
-  // Update markers
+
   useEffect(() => {
-    if (!mapRef.current || !mapRef.current.loaded()) {
-      console.log('Map not ready, deferring marker update');
-      return;
-    }
+    if (!mapRef.current || !mapRef.current.loaded()) return;
 
-    console.log('Updating markers, current issues:', issues.length);
+    markersRef.current.forEach((marker) => marker.remove());
+    markersRef.current = [];
 
-    // Clear existing markers
-    markersRef.current.forEach(marker => marker.remove());
-    markersRef.current = [];    // Add markers for each issue
     issues.forEach((issue) => {
-      if (!issue || !issue.location || typeof issue.location.lng !== 'number' || typeof issue.location.lat !== 'number') {
-        console.error('Invalid issue data:', issue);
+      if (!issue?.location || typeof issue.location.lng !== 'number' || typeof issue.location.lat !== 'number') {
         return;
+      }      const el = document.createElement('div');
+      el.className = styles.marker;
+      if (issue.id) {
+        el.dataset.id = issue.id;
       }
 
-      try {
-        const el = document.createElement('div');
-        el.className = 'custom-marker';
-        const pinColor = issue.color === 'red' ? '#dc2626' : '#15803d';
+      const pinColor = issue.color === 'red' ? '#dc2626' : '#15803d';
+      el.innerHTML = `
+        <svg width="38" height="48" viewBox="0 0 38 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M18 0C8.075 0 0 8.075 0 18c0 8.45 13.05 23.425 17.075 27.9c1.075 1.2 2.775 1.2 3.85 0C24.95 41.425 38 26.45 38 18c0-9.925-8.075-18-18-18z" fill="${pinColor}"/>
+          <path d="M18 25.5c-4.125 0-7.5-3.375-7.5-7.5S13.875 10.5 18 10.5s7.5 3.375 7.5 7.5-3.375 7.5-7.5 7.5z" fill="white"/>
+        </svg>
+      `;
 
-        el.innerHTML = `
-          <svg width="36" height="48" viewBox="0 0 36 48" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));">
-            <path d="M18 0C8.075 0 0 8.075 0 18c0 8.45 13.05 23.425 17.075 27.9c1.075 1.2 2.775 1.2 3.85 0C24.95 41.425 38 26.45 38 18c0-9.925-8.075-18-18-18z" fill="${pinColor}"/>
-            <path d="M18 25.5c-4.125 0-7.5-3.375-7.5-7.5S13.875 10.5 18 10.5s7.5 3.375 7.5 7.5-3.375 7.5-7.5 7.5z" fill="white"/>
-          </svg>
-        `;
+      const marker = new mapboxgl.Marker({ element: el, offset: [0, -17] }).setLngLat([
+        issue.location.lng,
+        issue.location.lat
+      ]);      
+      const popup = new mapboxgl.Popup({
+        offset: [0, -43],
+        closeButton: false,
+        closeOnClick: false,
+        maxWidth: '320px',
+        className: styles.mapboxWrapper
+      });
 
-        const popupContent = document.createElement('div');
-        popupContent.className = 'pin-popup';
-        popupContent.innerHTML = `
-          <div style="
-            padding: 1.5rem;
-            min-width: 240px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-          ">
-            <h3 style="
-              margin: 0 0 1rem;
-              text-align: center;
-              font-size: 1.1rem;
-              font-weight: 600;
-              color: ${pinColor};
-            ">
-              ${issue.color === 'red' ? '⚠️ Accessibility Issue' : '✓ Accessible Feature'}
-            </h3>
-            <p style="
-              margin: 0 0 1rem;
-              text-align: center;
-              color: #374151;
-              font-size: 0.95rem;
-              line-height: 1.4;
-            ">${issue.description}</p>
-            ${issue.userId === user?.uid && issue.id ? `
-              <div style="margin-top: 1rem; text-align: center;">
-                <button 
-                  onclick="window.deletePin('${issue.id}', '${issue.userId}')"
-                  style="
-                    background: #ef4444;
-                    color: white;
-                    border: none;
-                    padding: 0.625rem 1.25rem;
-                    border-radius: 0.375rem;
-                    cursor: pointer;
-                    font-weight: 500;
-                    font-size: 0.875rem;
-                    transition: background-color 0.2s;
-                  "
-                  onmouseover="this.style.backgroundColor='#dc2626'"
-                  onmouseout="this.style.backgroundColor='#ef4444'"
-                >
-                  Delete Pin
-                </button>
-              </div>
-            ` : ''}
-          </div>
-        `;
+      marker.setPopup(popup);
+      updatePopupContent(marker, issue);
 
-        // Create and add the marker
-        const popup = new mapboxgl.Popup({
-          offset: [0, -30],
-          closeButton: true,
-          closeOnClick: false,
-          maxWidth: '300px'
-        }).setDOMContent(popupContent);
+      marker.addTo(mapRef.current!);
+      markersRef.current.push(marker);
 
-        const marker = new mapboxgl.Marker({ element: el })
-          .setLngLat([issue.location.lng, issue.location.lat])
-          .setPopup(popup)
-          .addTo(mapRef.current!);
-
-        markersRef.current.push(marker);
-        console.log('Added marker for issue:', issue.id);
-      } catch (error) {
-        console.error('Error creating marker:', error);
-      }
+      marker.getElement().addEventListener('click', () => {
+        closeOtherPopups(marker);
+      });
     });
+  }, [issues, updatePopupContent, closeOtherPopups]);
 
-    // Add delete function to window
-    if (onDeletePin) {
-      (window as any).deletePin = (pinId: string, userId: string) => {
-        onDeletePin(pinId, userId);
-      };
-    }
-
-    return () => {
-      delete (window as any).deletePin;
-    };
-  }, [issues, user, onDeletePin]);
-
-  // Handle pending location popup
   useEffect(() => {
     if (!mapRef.current) return;
 
-    if (reportPopupRef.current) {
-      reportPopupRef.current.remove();
-      reportPopupRef.current = null;
-    }
+    closePopup();
 
     if (pendingLocation) {
       const popupNode = document.createElement('div');
       const root = ReactDOM.createRoot(popupNode);
-      root.render(renderReportForm(pendingLocation));
+      root.render(renderReportForm(pendingLocation, null));
 
-      reportPopupRef.current = new mapboxgl.Popup({
-        offset: [-32, -35],
+      const buttonsWrapper = document.createElement('div');
+      buttonsWrapper.style.display = 'flex';
+      buttonsWrapper.style.gap = '8px';
+      buttonsWrapper.style.marginTop = '8px';
+      buttonsWrapper.style.justifyContent = 'space-between';
+
+      const labels = ['no ramp', 'broken elevator', 'ramp'];
+      labels.forEach((label) => {
+        const btn = document.createElement('button');
+        btn.innerText = label;
+        btn.style.backgroundColor = 'white';
+        btn.style.color = 'black';
+        btn.style.border = '1px solid #ccc';
+        btn.style.padding = '4px 8px';
+        btn.style.borderRadius = '6px';
+        btn.style.cursor = 'pointer';
+        btn.style.fontSize = '0.9rem';
+
+        btn.onclick = () => {
+          const textarea = popupNode.querySelector('textarea, input[type="text"]') as HTMLInputElement | HTMLTextAreaElement;
+          if (textarea) {
+            textarea.value = label;
+            textarea.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        };
+
+        buttonsWrapper.appendChild(btn);
+      });
+
+      popupNode.appendChild(buttonsWrapper);
+
+      const popup = new mapboxgl.Popup({
+        offset: [0, -15],
         closeOnClick: false,
-        closeButton: false
+        closeButton: false,
+        maxWidth: '400px'
       })
         .setLngLat([pendingLocation.lng, pendingLocation.lat])
         .setDOMContent(popupNode)
         .addTo(mapRef.current);
+
+      reportPopupRef.current = popup;
     }
 
-    return () => {
-      if (reportPopupRef.current) {
-        reportPopupRef.current.remove();
-        reportPopupRef.current = null;
-      }
-    };
+    return () => closePopup();
   }, [pendingLocation, renderReportForm]);
 
-  return (
-    <div
+  return (    <div
       ref={mapContainer}
-      className={"mapContainer"}
+      className={`${styles.mapContainer} ${styles.mapboxWrapper}`}
       style={{ width: '100%', height: '100%' }}
     />
   );

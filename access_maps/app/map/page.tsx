@@ -3,12 +3,13 @@
 import dynamic from 'next/dynamic';
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { collection, addDoc, getDocs, deleteDoc, doc, onSnapshot } from 'firebase/firestore';
+import { collection, addDoc, getDocs, deleteDoc, updateDoc, doc, onSnapshot, increment, arrayUnion, getDoc } from 'firebase/firestore';
 import { db } from '../../firebaseConfig';
 import { useAuth } from '@/componenets/AuthProvider';
 import ReportForm from '@/componenets/ReportForm/ReportForm';
 import { Issue } from '@/componenets/types';
 import styles from './MapPage.module.css';
+import { Home } from 'lucide-react';
 
 const Map = dynamic(() => import('@/componenets/Map'), { ssr: false });
 
@@ -48,20 +49,19 @@ export default function MapPage() {
 
     console.log('Setting up Firestore pins listener...');
     const pinsCollection = collection(db, 'pins');
-    
     const unsubscribe = onSnapshot(pinsCollection, (snapshot) => {
       console.log('Received pin update from Firestore');
       const updatedPins = snapshot.docs.map(doc => {
         const data = doc.data();
-        console.log('Raw pin data:', { id: doc.id, ...data });
         
-        // Ensure the location data is properly structured
+        // Ensure proper data structure and default values
         if (!data.location || typeof data.location.lng !== 'number' || typeof data.location.lat !== 'number') {
           console.error('Invalid pin location data:', data.location);
           return null;
         }
-
-        return {
+        
+        // Ensure all fields have proper default values
+        const processedPin = {
           id: doc.id,
           location: {
             lng: data.location.lng,
@@ -70,11 +70,21 @@ export default function MapPage() {
           description: data.description || '',
           color: data.color || 'red',
           userId: data.userId,
-          createdAt: data.createdAt
+          createdAt: data.createdAt,
+          upvotes: typeof data.upvotes === 'number' ? data.upvotes : 0,
+          votedUserIds: Array.isArray(data.votedUserIds) ? data.votedUserIds : []
         } as Issue;
+
+        console.log('Processed pin data:', {
+          id: processedPin.id,
+          upvotes: processedPin.upvotes,
+          votedUserIds: processedPin.votedUserIds,
+          hasVotedUsers: Array.isArray(processedPin.votedUserIds)
+        });
+
+        return processedPin;
       }).filter(pin => pin !== null) as Issue[];
       
-      console.log('Processed pins:', updatedPins);
       setIssues(updatedPins);
       setIsLoading(false);
     }, (error) => {
@@ -82,11 +92,7 @@ export default function MapPage() {
       setIsLoading(false);
     });
 
-    // Cleanup subscription when component unmounts
-    return () => {
-      console.log('Cleaning up Firestore listener');
-      unsubscribe();
-    };
+    return () => unsubscribe();
   }, [db]);
 
   const handleMapClick = async (location: { lng: number; lat: number }) => {
@@ -115,13 +121,14 @@ export default function MapPage() {
         color: issue.color,
         userId: user.uid 
       });
-      
-      const pinData = {
+        const pinData = {
         location: issue.location,
         description: issue.description,
         color: issue.color,
         userId: user.uid,
-        createdAt: new Date().toISOString()
+        createdAt: new Date().toISOString(),
+        upvotes: 0,
+        votedUserIds: []
       };
 
       const docRef = await addDoc(collection(db, 'pins'), pinData);
@@ -136,6 +143,54 @@ export default function MapPage() {
     } catch (error) {
       console.error('Error adding pin:', error);
       alert('Failed to add pin. Please try again.');
+    }
+  };  const upvoteIssue = async (pinId: string, userId: string) => {
+    if (!user || !db) {
+      throw new Error('User must be logged in to upvote');
+    }
+
+    // Use a transaction to ensure data consistency
+    const pinRef = doc(db, 'pins', pinId);
+    try {
+      console.log('Starting upvote transaction for pin:', { pinId, userId });
+      
+      const pinDoc = await getDoc(pinRef);
+      if (!pinDoc.exists()) {
+        throw new Error('Pin not found');
+      }
+
+      const pinData = pinDoc.data();
+      
+      // Validate upvote conditions
+      if (pinData.userId === userId) {
+        throw new Error('Cannot upvote your own pin');
+      }
+      
+      const votedUserIds = Array.isArray(pinData.votedUserIds) ? pinData.votedUserIds : [];
+      if (votedUserIds.includes(userId)) {
+        throw new Error('You have already upvoted this pin');
+      }
+
+      // Calculate new values
+      const currentUpvotes = typeof pinData.upvotes === 'number' ? pinData.upvotes : 0;
+      const newUpvotes = currentUpvotes + 1;
+      
+      console.log('Updating pin with new upvote data:', {
+        currentUpvotes,
+        newUpvotes,
+        currentVoters: votedUserIds,
+        newVoter: userId
+      });
+
+      // Update the pin data
+      await updateDoc(pinRef, {
+        upvotes: newUpvotes,
+        votedUserIds: arrayUnion(userId),
+      });
+
+    } catch (error) {
+      console.error('Error upvoting pin:', error);
+      throw error;
     }
   };
 
@@ -162,11 +217,11 @@ export default function MapPage() {
   return (
     <main className={styles.main}>
       <button
-        onClick={() => router.push('/')}
-        className={styles.homeButton}
-      >
-        Home
-      </button>
+  onClick={() => router.push('/')}
+  className={styles.homeButton}
+>
+  <Home size={20} style={{  }} />
+</button>
       <div className={styles.container}>
         <div ref={mapContainerRef} className={styles.mapWrapper}>
           <Map
@@ -174,6 +229,7 @@ export default function MapPage() {
             onMapClick={handleMapClick}
             pendingLocation={pendingLocation}
             onDeletePin={handleDeletePin}
+            upvoteIssue={upvoteIssue}
             renderReportForm={(location) => (
               <ReportForm location={location} onSubmit={handleNewIssue} />
             )}

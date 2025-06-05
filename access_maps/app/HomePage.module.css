@@ -102,3 +102,182 @@
   background: #f56565;
   color: white;
 }
+
+.authForm {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 430px;
+  margin: 2rem auto;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.formLabel {
+  display: block;
+  font-size: 0.875rem;
+  color: #4a5568;
+  margin-bottom: 0.5rem;
+}
+
+.formInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: #031161;
+  box-shadow: 0 0 0 3px rgba(3, 17, 97, 0.1);
+}
+
+.emailForm {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  width: 100%;
+  max-width: 430px;
+  margin: 2rem auto;
+  padding: 2.5rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e2e8f0;
+  border-radius: 0.5rem;
+  font-size: 1rem;
+  transition: all 0.2s;
+  background: white;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #031161;
+  box-shadow: 0 0 0 3px rgba(3, 17, 97, 0.1);
+}
+
+.authButtons {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.switchAuthMode {
+  background: none;
+  border: none;
+  color: #031161;
+  font-size: 0.875rem;
+  cursor: pointer;
+  text-decoration: underline;
+  transition: color 0.2s;
+  padding: 0.5rem;
+}
+
+.switchAuthMode:hover {
+  color: #1e40af;
+}
+
+.errorText {
+  color: #dc2626;
+  text-align: center;
+  font-size: 0.875rem;
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background: #fee2e2;
+  border-radius: 0.5rem;
+  border: 1px solid #fecaca;
+}
+
+/* Pin Management Styles */
+.pinManagementSection {
+  background: white;
+  padding: 2rem;
+  border-radius: 1rem;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  margin: 2rem auto;
+  max-width: 800px;
+  width: 90%;
+}
+
+.pinList {
+  margin-top: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pinItem {
+  padding: 1.5rem;
+  background: #f8fafc;
+  border-radius: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: transform 0.2s;
+}
+
+.pinItem:hover {
+  transform: translateY(-2px);
+}
+
+.pinInfo {
+  flex: 1;
+}
+
+.pinDescription {
+  color: #1f2937;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.pinLocation {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.pinActions {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.pinButton {
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.editButton {
+  background: #031161;
+  color: white;
+}
+
+.editButton:hover {
+  background: #1e40af;
+}
+
+.deleteButton {
+  background: #dc2626;
+  color: white;
+}
+
+.deleteButton:hover {
+  background: #b91c1c;
+}

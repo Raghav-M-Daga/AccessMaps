@@ -8,10 +8,14 @@ import styles from "./ReportForm.module.css";
 interface Props {
   location: { lng: number; lat: number };
   onSubmit: (issue: Issue) => void;
+  existingIssue?: Issue | null;
+  onCancelEdit?: () => void;
 }
+
 
 export default function ReportForm({ location, onSubmit }: Props) {
   const [desc, setDesc] = useState('');
+
   const [color, setColor] = useState<'red' | 'green'>('red');
   const { user, isInitialized } = useAuth();
 
@@ -28,6 +32,7 @@ export default function ReportForm({ location, onSubmit }: Props) {
       description: desc,
       color,
       userId: user.uid,
+      upvotes: 0,
       createdAt: new Date().toISOString()
     });
     
