@@ -34,51 +34,9 @@ AccessMaps is a collaborative campus accessibility mapping platform that empower
   - Accessible UI components
   - Smooth animations
 
-## 🚀 Getting Started
+## 🚀 Accessing the Maps
 
-### Prerequisites
-
-- Node.js (v16 or higher)
-- npm or yarn
-- Firebase account
-- Mapbox API key
-
-### Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/access_maps.git
-cd access_maps
-```
-
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
-
-3. Configure environment variables:
-Create a `.env.local` file in the root directory with:
-```env
-NEXT_PUBLIC_MAPBOX_TOKEN=your_mapbox_token
-NEXT_PUBLIC_FIREBASE_API_KEY=your_firebase_api_key
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
-NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
-NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID=your_measurement_id
-```
-
-4. Run the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
-
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+This project is deployed using Vercel and can be accessed through: https://access-maps-v2as.vercel.app/
 
 ## 🏗️ Project Structure
 
@@ -165,29 +123,8 @@ access_maps/
    - Bulk pin management
    - User management system
 
-## 🤝 Contributing
-
-We welcome contributions to AccessMaps! To contribute:
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/AmazingFeature`
-3. Commit your changes: `git commit -m 'Add some AmazingFeature'`
-4. Push to the branch: `git push origin feature/AmazingFeature`
-5. Open a Pull Request
-
-Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on our code of conduct and submission process.
-
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 📧 Contact
-
-Project Link: [https://github.com/yourusername/access_maps](https://github.com/yourusername/access_maps)
-
 ## 🙏 Acknowledgments
 
 - [Mapbox](https://www.mapbox.com/) for their excellent mapping platform
 - [Firebase](https://firebase.google.com/) for backend services
 - [Next.js](https://nextjs.org/) team for the amazing framework
-- All contributors who help make campus accessibility better
