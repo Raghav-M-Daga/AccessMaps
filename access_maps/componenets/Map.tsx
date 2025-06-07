@@ -7,6 +7,7 @@ import { Issue } from '@/componenets/types';
 import { useAuth } from './AuthProvider';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import styles from './Map.module.css';
+import SearchBar from './SearchBar/SearchBar';
 
 type Props = {
   issues: Issue[];
@@ -35,6 +36,17 @@ export default function Map({
   const mapRef = useRef<mapboxgl.Map | null>(null);
   const markersRef = useRef<mapboxgl.Marker[]>([]);
   const reportPopupRef = useRef<mapboxgl.Popup | null>(null);
+
+  const flyToLocation = useCallback(({ lng, lat }: { lng: number; lat: number }) => {
+    if (mapRef.current) {
+      mapRef.current.flyTo({
+        center: [lng, lat],
+        zoom: 17,
+        essential: true,
+        duration: 1500
+      });
+    }
+  }, []);
 
   const closePopup = () => {
     if (reportPopupRef.current) {
@@ -363,11 +375,13 @@ export default function Map({
 
     return () => closePopup();
   }, [pendingLocation, renderReportForm]);
-
-  return (    <div
+  return (
+    <div
       ref={mapContainer}
       className={`${styles.mapContainer} ${styles.mapboxWrapper}`}
-      style={{ width: '100%', height: '100%' }}
-    />
+      style={{ width: '100%', height: '100%', position: 'relative' }}
+    >
+      <SearchBar onLocationSelect={flyToLocation} />
+    </div>
   );
 }

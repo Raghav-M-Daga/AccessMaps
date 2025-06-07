@@ -52,7 +52,7 @@ export default function ReportForm({ location, onSubmit, existingIssue }: Props)
           className={styles.textarea}
           value={desc}
           onChange={(e) => setDesc(e.target.value)}
-          placeholder="Describe the issue or accessibility feature..."
+          placeholder="Describe the report..."
           required
         />
 

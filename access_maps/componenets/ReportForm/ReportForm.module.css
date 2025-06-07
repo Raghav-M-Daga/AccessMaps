@@ -12,22 +12,6 @@
   position: relative;
 }
 
-.container:hover::before {
-  content: 'Press Esc to close';
-  position: fixed;
-  background: #000000;
-  color: white;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 1000;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-  animation: fadeIn 0.2s ease-in-out;
-}
-
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -50,26 +34,26 @@
 }
 
 .title {
-  font-size: 2rem;
+  font-size: 1.5rem;
   font-weight: 800;
   color: #111827;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.3rem;
   font-family: sans-serif;
   text-align: center;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .textarea {
   width: 80%;
   margin: 0 auto 1rem auto;
-  padding: 1rem;
-  border: 2px solid #d1d5db;
+  padding: 0.5rem;
+  border: 2px solid #b4b4b4;
   border-radius: 0.5rem;
   background: #f9fafb;
   color: #111827;
   font-size: 0.95rem;
   font-family: sans-serif;
-  min-height: 100px;
+  min-height: 35px;
   resize: none;
   transition: border 0.2s, box-shadow 0.2s;
   display: block;
