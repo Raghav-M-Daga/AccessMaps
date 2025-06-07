@@ -97,13 +97,25 @@
   border: none !important;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
   overflow: hidden !important;
+  position: relative;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .mapboxWrapper :global(.mapboxgl-popup-close-button) {
   padding: 8px !important;
   right: 8px !important;
-  top: 8px !important;
-  color: #6b7280 !important;
+  top: 4px !important;
+  color: black !important;
   font-size: 24px !important;
   line-height: 1 !important;
   z-index: 2 !important;

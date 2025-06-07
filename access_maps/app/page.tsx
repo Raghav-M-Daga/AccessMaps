@@ -184,12 +184,18 @@ export default function HomePage() {
             <>
               {!showEmailForm ? (
                 <div className={styles.authButtons}>
+                  
                   <button
                     className={`${styles.heroButton} ${isLoading || authLoading ? styles.loading : ''}`}
                     onClick={handleGoogleLogin}
                     disabled={isLoading || authLoading || !isInitialized}
                   >
-                    {isLoading || authLoading ? 'Signing in...' : 'Continue with Google'}
+                    <img 
+                      src="/google-logo.png" 
+                      alt="Google"
+                      className={styles.googleLogo}
+                    />
+                    {isLoading || authLoading ? 'Signing in...' : 'Sign in with Google'}
                   </button>
                   <button
                     className={styles.heroButton}

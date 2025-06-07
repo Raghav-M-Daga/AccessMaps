@@ -164,16 +164,24 @@ export default function Map({
         const editButton = document.createElement('button');
         editButton.textContent = 'Edit';
         editButton.className = styles.editButton;
-        
-        editButton.onclick = (e) => {
+          editButton.onclick = (e) => {
           e.preventDefault();
           e.stopPropagation();
-          onMapClick?.({
-            lng: issue.location.lng,
-            lat: issue.location.lat,
-            x: 0,
-            y: 0
-          });
+          const popupNode = document.createElement('div');
+          const root = ReactDOM.createRoot(popupNode);
+          root.render(renderReportForm({ lng: issue.location.lng, lat: issue.location.lat }, issue));
+          
+          const popup = new mapboxgl.Popup({
+            offset: [0, -15],
+            closeOnClick: false,
+            closeButton: true,
+            maxWidth: '400px'
+          })
+            .setLngLat([issue.location.lng, issue.location.lat])
+            .setDOMContent(popupNode)
+            .addTo(mapRef.current!);
+            
+          reportPopupRef.current = popup;
         };
 
         const deleteButton = document.createElement('button');
@@ -281,7 +289,7 @@ export default function Map({
       ]);      
       const popup = new mapboxgl.Popup({
         offset: [0, -43],
-        closeButton: false,
+        closeButton: true,
         closeOnClick: false,
         maxWidth: '320px',
         className: styles.mapboxWrapper
@@ -343,7 +351,7 @@ export default function Map({
       const popup = new mapboxgl.Popup({
         offset: [0, -15],
         closeOnClick: false,
-        closeButton: false,
+        closeButton: true,
         maxWidth: '400px'
       })
         .setLngLat([pendingLocation.lng, pendingLocation.lat])

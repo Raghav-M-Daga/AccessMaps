@@ -13,10 +13,13 @@ interface Props {
 }
 
 
-export default function ReportForm({ location, onSubmit }: Props) {
-  const [desc, setDesc] = useState('');
-
-  const [color, setColor] = useState<'red' | 'green'>('red');
+export default function ReportForm({ location, onSubmit, existingIssue }: Props) {
+  const [desc, setDesc] = useState(existingIssue?.description || '');
+  const [color, setColor] = useState<'red' | 'green'>(
+    existingIssue?.color === 'red' || existingIssue?.color === 'green' 
+      ? existingIssue.color 
+      : 'red'
+  );
   const { user, isInitialized } = useAuth();
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

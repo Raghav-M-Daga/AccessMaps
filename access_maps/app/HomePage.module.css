@@ -59,21 +59,38 @@
 }
 
 .heroButton {
-  border-radius: 1rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 1.125rem;
-  box-shadow: 0 4px 24px rgba(30, 64, 175, 0.15);
-  background: #040a38;
-  color: #fff;
-  font-weight: 400;
-  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 24px;
+  padding: 12px 24px;
+  font-size: 14px;
+  line-height: 20px;
+  background: #131314;
+  color: #E3E3E3;
+  font-weight: 500;
+  font-family: var(--font-roboto);
+  transition: all 0.2s;
   cursor: pointer;
-  font-family: 'DM Serif Text', serif;
+  border: 1px solid #8E918F;
+  min-width: 180px;
+  justify-content: center;
+  position: relative;
 }
 
 .heroButton:hover {
-  background: #dfe8ff;
-  color: #031161;
+  background: #2f2f30;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.heroButton:active {
+  background: #000000;
+}
+
+.googleLogo {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
 }
 
 .loading {
@@ -173,7 +190,7 @@
   flex-direction: column;
   gap: 1rem;
   width: 100%;
-  max-width: 400px;
+  max-width: 300px;
   margin: 0 auto;
 }
 
