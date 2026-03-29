@@ -1,4 +1,4 @@
-# AccessMaps: School Edition 🗺️
+# AccessMaps: School Edition 
 
 [![Next.js](https://img.shields.io/badge/Next.js-13.0-blue.svg)](https://nextjs.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-10.0-orange.svg)](https://firebase.google.com/)
