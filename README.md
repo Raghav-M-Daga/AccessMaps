@@ -1,4 +1,4 @@
-# AccessMaps: School Edition 
+# AccessMaps 
 
 [![Next.js](https://img.shields.io/badge/Next.js-13.0-blue.svg)](https://nextjs.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-10.0-orange.svg)](https://firebase.google.com/)
@@ -8,7 +8,7 @@
 
 AccessMaps is a collaborative campus accessibility mapping platform that empowers students to create a more inclusive educational environment. Users can tag and describe accessibility features or challenges, helping everyone navigate campus safely and efficiently.
 
-## 🌟 Features
+## Features
 
 - **Interactive Campus Map**
   - Real-time visualization of accessibility features and challenges
@@ -34,11 +34,11 @@ AccessMaps is a collaborative campus accessibility mapping platform that empower
   - Accessible UI components
   - Smooth animations
 
-## 🚀 Accessing the Maps
+## Accessing the Maps
 
 This project is deployed using Vercel and can be accessed through: https://access-maps-v2as.vercel.app/
 
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 access_maps/
@@ -53,7 +53,7 @@ access_maps/
 └── styles/              # Global styles
 ```
 
-## 💻 Technologies Used
+## Technologies Used
 
 - **Frontend:**
   - Next.js 13 (React framework)
@@ -71,7 +71,7 @@ access_maps/
   - PostCSS
   - TypeScript compiler
 
-## 🌟 Core Features
+## Core Features
 
 ### Map Interaction
 - Click anywhere on the map to add new accessibility pins
@@ -95,15 +95,7 @@ access_maps/
 - User-specific content management
 - Protected routes and actions
 
-## 🔒 Security Features
-
-- Firebase Authentication integration
-- Protected API endpoints
-- User data encryption
-- Real-time database security rules
-- Rate limiting on API calls
-
-## 🚀 Future Enhancements
+## Future Enhancements
 
 1. **Enhanced Accessibility Features**
    - Audio descriptions
@@ -123,8 +115,8 @@ access_maps/
    - Bulk pin management
    - User management system
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- [Mapbox](https://www.mapbox.com/) for their excellent mapping platform
+- [Mapbox](https://www.mapbox.com/) for mapping platform
 - [Firebase](https://firebase.google.com/) for backend services
-- [Next.js](https://nextjs.org/) team for the amazing framework
+- [Next.js](https://nextjs.org/) team for framework
